@@ -2,6 +2,8 @@
 #include <clocale>
 #include <iostream>
 #include <vector>
+
+
 using namespace std;
 
 class snake{
@@ -46,7 +48,7 @@ public:
 
   int map[21][40];
   vector<snake> snakes;
-  int s_len = 3;
+  int s_len = 10;
 
   game()
   {
@@ -54,13 +56,8 @@ public:
     {
       for(int j = 0 ; j < 40 ; j++)
       {
-        if(i == 0 || i == 20 || j == 0 || j == 39)
-        {
-          map[i][j] = 1;
-        }
-        else{
-          map[i][j] = 0;
-        }
+        if(i == 0 || i == 20 || j == 0 || j == 39) map[i][j] = 1;
+        else map[i][j] = 0;
       }
     }
     map[0][0] = 2;
@@ -74,9 +71,9 @@ public:
 
   void initSnake()
   {
-    for(int i = 0 ; i < 3 ; i++)
+    for(int i = 0 ; i < s_len ; i++)
     {
-      snake temp(10,20 + i);
+      snake temp(20 + i ,10);
       snakes.push_back(temp);
     }
   }
@@ -87,27 +84,70 @@ public:
 
   }
 
-
-  void stage()
+  void moveSnake(char dir)
   {
+
+    for(int i = s_len - 1 ; i > 0 ; i--)
+    {
+      snakes[i].setx(snakes[i-1].getx());
+      snakes[i].sety(snakes[i-1].gety());
+    }
+
+
+    int nowx = snakes[0].getx();
+    int nowy = snakes[0].gety();
+
+
+    switch(dir)
+    {
+      case 'l' :
+          snakes[0].setx(nowx - 1);
+          break;
+      case 'r' :
+          snakes[0].setx(nowx + 1);
+          break;
+      case 'u' :
+          snakes[0].sety(nowy - 1);
+          break;
+      case 'd' :
+          snakes[0].sety(nowy + 1);
+          break;
+    }
+
+  }
+
+  void printMap()
+  {
+    WINDOW *gwin;
 
     initscr();
     curs_set(0);
     keypad(stdscr, TRUE);
     noecho();
     cbreak();
-
     resize_term(50, 50);
+    start_color();
+
+    init_pair(1, COLOR_WHITE , COLOR_GREEN);
+    init_pair(2, COLOR_BLUE , COLOR_BLACK);
+
+    attron(COLOR_PAIR(2));
+    mvprintw(1,1, "snake game");
+    refresh();
+    attroff(COLOR_PAIR(2));
+
+    gwin = newwin(21 , 40 , 5, 10);
+    wattron(gwin, COLOR_PAIR(1));
 
     for(int i = 0 ; i < 21 ; i++)  ////MAP
     {
       for(int j = 0; j < 40 ; j++)
       {
-          if(map[i][j] == 1) mvprintw(i, j, "\u2B1B");
+          if(map[i][j] == 1) mvwprintw(gwin, i, j, "\u2B1B");
 
-          else if(map[i][j] == 0) mvprintw(i, j, " ");
+          else if(map[i][j] == 0) mvwprintw(gwin, i, j, " ");
 
-          else mvprintw(i, j, "\u2B1C");
+          else mvwprintw(gwin, i, j, "\u2B1C");
       }
     }
 
@@ -115,14 +155,80 @@ public:
     {
       int xx = snakes[i].getx();
       int yy = snakes[i].gety();
-      if(i == 0) mvprintw(xx, yy, "\u2B1B");
-      else mvprintw(xx, yy, "\u2B1C");
+      if(i == 0) mvwprintw(gwin, yy, xx, "\u2B1B");
+      else mvwprintw(gwin, yy, xx, "\u2B1C");
+    }
+    wrefresh(gwin);
 
+  }
+
+  void stage1()
+  {
+    printMap();
+    char dir = 'l'; ////처음 방향
+    while(true)
+    {
+
+
+
+      int key = getch(); ////입력이 있을 때
+      if(key == KEY_LEFT)
+      {
+        if(dir == 'r')
+        {
+          mvprintw(1,1, "@@@@@ GAME OVER @@@@@");
+          break;
+        }
+        dir = 'l';
+      }
+      else if (key == KEY_RIGHT)
+      {
+        if(dir == 'l')
+        {
+          mvprintw(1,1, "@@@@@ GAME OVER @@@@@");
+          break;
+        }
+        dir = 'r';
+      }
+      else if (key == KEY_UP)
+      {
+        if(dir == 'd')
+        {
+          mvprintw(1,1, "@@@@@ GAME OVER @@@@@");
+          break;
+        }
+        dir = 'u';
+      }
+      else if (key == KEY_DOWN)
+      {
+        if(dir == 'u')
+        {
+          mvprintw(1,1, "@@@@@ GAME OVER @@@@@");
+          break;
+        }
+        dir = 'd';
+      }
+
+      int headx = snakes[0].getx();
+      int heady = snakes[0].gety();
+      moveSnake(dir);
+      if(headx == 0 || headx == 39 ||
+          heady == 0 || heady == 20 )
+        {
+          mvprintw(1,1, "@@@@@ GAME OVER @@@@@");
+          break;
+        }
+  //    for(int i = 1 ; i < s_len ; i++)
+  //    {
+
+    //  }
+
+
+        printMap();
     }
 
-
-    refresh();
     getch();
+
     endwin();
 
   }
@@ -136,7 +242,7 @@ int main()
   setlocale(LC_ALL, "");
 
   game g1;
-  g1.stage();
+  g1.stage1();
 
   return 0;
 }
