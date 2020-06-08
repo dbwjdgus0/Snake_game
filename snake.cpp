@@ -4,7 +4,6 @@
 #include <vector>
 #include <unistd.h>
 
-
 using namespace std;
 
 class snake{
@@ -170,8 +169,6 @@ public:
     char dir = 'l'; ////처음 방향
     while(true)
     {
-
-
       int key = getch(); ////입력이 있을 때
       if(key == KEY_LEFT)
       {
@@ -210,32 +207,35 @@ public:
         dir = 'd';
       }
 
+      moveSnake(dir);
 
-
+      //***** GAMEOVER *****//
       int headx = snakes[0].getx();
       int heady = snakes[0].gety();
-      moveSnake(dir);
-      if(headx == 0 || headx == 39 || heady == 0 || heady == 20 )
-      {
-        mvprintw(1, 1, "@@@@@ GAME OVER @@@@@");
-        break;
-      }
-      
+
+      int gameover = 0;
+
+      if(headx == 0 || headx == 39 || heady == 0 || heady == 20 ) gameover = 1;
+
       for(int i = 1 ; i < s_len ; i++)
       {
-        int xx = snakes[i].getx();
-        int yy = snakes[i].gety();
-        if((xx == headx) && (yy == heady))
+        if(headx == snakes[i].getx() && heady == snakes[i].gety())
         {
-          mvprintw(1, 1, "@@@@@ GAME OVER @@@@@");
+          gameover = 1;
           break;
         }
-      } ////끄어어어ㅓ 여기 스네이크 헤드가 지 몸통 만날때 안멈춘다ㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏ 도와줘요 정현샘~~~~~~~~~`~``
+      }
 
+      if(gameover)
+      {
+        mvprintw(1,1, "@@@@@ GAME OVER @@@@@");
+        break;
+      }
 
-        printMap();
-        sleep(1);
+      printMap();
+      usleep(500000); ///micro seconds - > 0.5 seconds
     }
+
     nodelay(stdscr, FALSE);
     getch();
 
