@@ -2,6 +2,7 @@
 #include <clocale>
 #include <iostream>
 #include <vector>
+#include <unistd.h>
 
 
 using namespace std;
@@ -123,6 +124,7 @@ public:
     initscr();
     curs_set(0);
     keypad(stdscr, TRUE);
+    nodelay(stdscr, TRUE);
     noecho();
     cbreak();
     resize_term(50, 50);
@@ -170,7 +172,6 @@ public:
     {
 
 
-
       int key = getch(); ////입력이 있을 때
       if(key == KEY_LEFT)
       {
@@ -209,24 +210,33 @@ public:
         dir = 'd';
       }
 
+
+
       int headx = snakes[0].getx();
       int heady = snakes[0].gety();
       moveSnake(dir);
-      if(headx == 0 || headx == 39 ||
-          heady == 0 || heady == 20 )
+      if(headx == 0 || headx == 39 || heady == 0 || heady == 20 )
+      {
+        mvprintw(1, 1, "@@@@@ GAME OVER @@@@@");
+        break;
+      }
+      
+      for(int i = 1 ; i < s_len ; i++)
+      {
+        int xx = snakes[i].getx();
+        int yy = snakes[i].gety();
+        if((xx == headx) && (yy == heady))
         {
-          mvprintw(1,1, "@@@@@ GAME OVER @@@@@");
+          mvprintw(1, 1, "@@@@@ GAME OVER @@@@@");
           break;
         }
-  //    for(int i = 1 ; i < s_len ; i++)
-  //    {
-
-    //  }
+      } ////끄어어어ㅓ 여기 스네이크 헤드가 지 몸통 만날때 안멈춘다ㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏ 도와줘요 정현샘~~~~~~~~~`~``
 
 
         printMap();
+        sleep(1);
     }
-
+    nodelay(stdscr, FALSE);
     getch();
 
     endwin();
