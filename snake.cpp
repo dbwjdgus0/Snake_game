@@ -1,61 +1,142 @@
 #include <ncurses.h>
 #include <clocale>
 #include <iostream>
+#include <vector>
+using namespace std;
 
+class snake{
 
-void stage(int map[21][40])
+private:
+  int x;
+  int y;
+
+public:
+
+  snake(int a, int b)
+  {
+    x = a;
+    y = b;
+  }
+
+  int getx()
+  {
+    return x;
+  }
+  int gety()
+  {
+    return y;
+  }
+  void setx(int a)
+  {
+    x = a;
+  }
+  void sety(int b)
+  {
+    y = b;
+  }
+
+};
+
+class game
 {
 
-  setlocale(LC_ALL, "");
+private:
 
-  initscr();
+public:
 
-  curs_set(FALSE);
-  keypad(stdscr, TRUE);
-  noecho();
-  resize_term(50, 50);
+  int map[21][40];
+  vector<snake> snakes;
+  int s_len = 3;
 
-  for(int i = 0 ; i < 21 ; i++)
+  game()
   {
-    for(int j = 0; j < 40 ; j++)
+    for(int i = 0 ; i < 21 ; i++) ///initalizing map
     {
-        if(map[i][j] == 1) mvprintw(i, j, "\u2B1B");
+      for(int j = 0 ; j < 40 ; j++)
+      {
+        if(i == 0 || i == 20 || j == 0 || j == 39)
+        {
+          map[i][j] = 1;
+        }
+        else{
+          map[i][j] = 0;
+        }
+      }
+    }
+    map[0][0] = 2;
+    map[20][39] = 2;
+    map[0][39] = 2;
+    map[20][0] = 2;
 
-        else if(map[i][j] == 0) mvprintw(i, j, " ");
+    initSnake();
+  }
 
-        else mvprintw(i, j, "\u2B1C");
+
+  void initSnake()
+  {
+    for(int i = 0 ; i < 3 ; i++)
+    {
+      snake temp(10,20 + i);
+      snakes.push_back(temp);
     }
   }
 
-  refresh();
-  getch();
-  endwin();
 
-}
+  void addTail()
+  {
+
+  }
+
+
+  void stage()
+  {
+
+    initscr();
+    curs_set(0);
+    keypad(stdscr, TRUE);
+    noecho();
+    cbreak();
+
+    resize_term(50, 50);
+
+    for(int i = 0 ; i < 21 ; i++)  ////MAP
+    {
+      for(int j = 0; j < 40 ; j++)
+      {
+          if(map[i][j] == 1) mvprintw(i, j, "\u2B1B");
+
+          else if(map[i][j] == 0) mvprintw(i, j, " ");
+
+          else mvprintw(i, j, "\u2B1C");
+      }
+    }
+
+    for(int i = 0 ; i < s_len ; i++)   ////SNAKE
+    {
+      int xx = snakes[i].getx();
+      int yy = snakes[i].gety();
+      if(i == 0) mvprintw(xx, yy, "\u2B1B");
+      else mvprintw(xx, yy, "\u2B1C");
+
+    }
+
+
+    refresh();
+    getch();
+    endwin();
+
+  }
+
+};
+
+
 
 int main()
 {
+  setlocale(LC_ALL, "");
 
-  int map[21][40];
-  for(int i = 0 ; i < 21 ; i++) ///initalizing map
-  {
-    for(int j = 0 ; j < 40 ; j++)
-    {
-      if(i == 0 || i == 20 || j == 0 || j == 39)
-      {
-        map[i][j] = 1;
-      }
-      else{
-        map[i][j] = 0;
-      }
-    }
-  }
-  map[0][0] = 2;
-  map[20][39] = 2;
-  map[0][39] = 2;
-  map[20][0] = 2;
-
-  stage(map);
+  game g1;
+  g1.stage();
 
   return 0;
 }
