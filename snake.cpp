@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
+#include <cstdlib>
 
 using namespace std;
 
@@ -48,7 +49,8 @@ public:
 
   int map[21][40];
   vector<snake> snakes;
-  int s_len = 10;
+  int s_len = 3;
+  int addX, addY, delX, delY;
 
   game()
   {
@@ -78,10 +80,54 @@ public:
     }
   }
 
-
-  void addTail()
+  void addItem()
   {
+    int r = rand() % 100 + 1;
+    if((r % 3) == 0)
+    {
+      addX = rand() % 38 + 1;
+      addY = rand() % 19 + 1;
+      map[addX][addY] = 3;
+    }
+  }
 
+  bool addTail()
+  {
+    int headx = snakes[0].getx();
+    int heady = snakes[0].gety();
+    if(headx == addX && heady == addY)
+    {
+      s_len += 1;
+      map[addX][addY] = 0;
+      addItem();
+      return true;
+    }
+    return false;
+  }
+
+  void delItem()
+  {
+    int r = rand() % 100 + 1;
+    if((r % 3) == 0)
+    {
+      delX = rand() % 38 + 1;
+      delY = rand() % 19 + 1;
+      map[delX][delY] == 4;
+    }
+  }
+
+  bool delTail()
+  {
+    int headx = snakes[0].getx();
+    int heady = snakes[0].gety();
+    if(headx == delX && heady == delY)
+    {
+      s_len -= 1;
+      map[delX][delY] = 0;
+      delItem();
+      return true;
+    }
+    return false;
   }
 
   void moveSnake(char dir)
@@ -131,6 +177,8 @@ public:
 
     init_pair(1, COLOR_WHITE , COLOR_GREEN);
     init_pair(2, COLOR_BLUE , COLOR_BLACK);
+    init_pair(3, COLOR_BLUE, COLOR_GREEN);
+    init_pair(4, COLOR_RED, COLOR_GREEN);
 
     attron(COLOR_PAIR(2));
     mvprintw(1,1, "snake game");
@@ -147,6 +195,23 @@ public:
           if(map[i][j] == 1) mvwprintw(gwin, i, j, "\u2B1B");
 
           else if(map[i][j] == 0) mvwprintw(gwin, i, j, " ");
+
+          else if(map[i][j] == 3)
+          {
+            wattroff(gwin, COLOR_PAIR(1));
+            wattron(gwin, COLOR_PAIR(3));
+            mvwprintw(gwin, i, j, "\u2B1B");
+            wattroff(gwin, COLOR_PAIR(3));
+            wattron(gwin, COLOR_PAIR(1));
+          }
+          else if(map[i][j] == 4)
+          {
+            wattroff(gwin, COLOR_PAIR(1));
+            wattron(gwin, COLOR_PAIR(4));
+            mvwprintw(gwin, i, j, "\u2B1B");
+            wattroff(gwin, COLOR_PAIR(4));
+            wattron(gwin, COLOR_PAIR(1));
+          }
 
           else mvwprintw(gwin, i, j, "\u2B1C");
       }
@@ -165,7 +230,11 @@ public:
 
   void stage1()
   {
+    addItem();
+    delItem();
     printMap();
+    int count1 = 1; //count1 -> addTail
+    int count2 = 1; //count2 -> delTail
     char dir = 'l'; ////처음 방향
     while(true)
     {
@@ -225,6 +294,15 @@ public:
           break;
         }
       }
+      if(addTail())
+      {
+        count1 = 0;
+      }
+      if(delTail())
+      {
+        count2 = 0;
+      }
+
 
       if(gameover)
       {
@@ -232,8 +310,24 @@ public:
         break;
       }
 
+      if(count1 == 10)
+      {
+        count1 = 1;
+        map[addX][addY] = 0;
+        addItem();
+      }
+      else count1++;
+
+      if(count2 == 10)
+      {
+        count2 = 1;
+        map[delX][delY] = 0;
+        delItem();
+      }
+      else count2++;
+
       printMap();
-      usleep(500000); ///micro seconds - > 0.5 seconds
+      usleep(5000); ///micro seconds - > 0.5 seconds
     }
 
     nodelay(stdscr, FALSE);
