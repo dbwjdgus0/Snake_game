@@ -336,7 +336,7 @@ public:
 
       if(passingtime < tick_cnt) gatepassing = false;
 
-      if(gateon == false && ran1 % 3 == 0) /// 5% 확률 게이트 생성
+      if(gateon == false && ran1 % 3 == 0) /// 33% 확률 게이트 생성
       {
           gatestart = tick_cnt;
           gateon = true;
@@ -345,6 +345,7 @@ public:
           map[g.g2y][g.g2x] = 3;
       }
 
+      /// 게이트 지속시간 100틱
       if(gatepassing == false && tick_cnt - gatestart == 100)
       {
         gateoff();
@@ -399,6 +400,17 @@ public:
 
       int gameover = 0;
 
+      /************************************
+      *                                   *
+      *                                   *
+      *      여기서 아이템 생성 랜덤뽑기!!!   *
+      *                                   *
+      *                                   *
+      **************************************/
+      // 왜냐면 스네이크 움직이고 -> 아이템 만들고 -> 출력하기 순서가 되어야 하기 때문 //
+      
+
+
       if(headx == 0 || headx == 39 || heady == 0 || heady == 20 )
       {
         if(map[heady][headx] == 3)
@@ -429,7 +441,7 @@ public:
 
 
       printMap();
-      usleep(100000); ///micro seconds - > 0.5 seconds
+      usleep(100000); ///  micro seconds - > 0.5 seconds
       tick_cnt++;
     }
 
