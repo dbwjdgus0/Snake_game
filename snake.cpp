@@ -169,7 +169,7 @@ public:
   vector<snake> snakes;
   vector<item> plus;
   vector<item> minus;
-  int s_len = 5;
+  int s_len = 10;
   int plustime[3] = {0, 0, 0};
   int minustime[3] = {0, 0, 0};
   int map[21][40];
@@ -527,7 +527,7 @@ public:
 
     mvwprintw(sc, 11, 4, "MISSION");
     mvwprintw(sc, 13, 2, "B:   ( )");
-    if(maxLen >= Mlen)
+    if(s_len >= Mlen)
     {
       wmove(sc, 13, 8);
       wprintw(sc, "v");
@@ -570,7 +570,7 @@ public:
     wattroff(sc, COLOR_PAIR(1));
     wrefresh(sc);
 
-    if(clear == 1) isClear = true;
+    if(clear == 4) isClear = true;
   }
 
 
@@ -751,28 +751,61 @@ public:
 
       if(map[heady][headx] == 4)
       {
+        plusSC++;
         map[heady][headx] = 0;
         for (int i = 0; i < plus.size(); i++)
         {
           if (headx == plus[i].getx() && heady == plus[i].gety())
           {
             plus.erase(plus.begin() + i);
+            item_cnt--;
+            itemon = false;
+            if (i == 0)
+            {
+              plustime[0] = plustime[1];
+              plustime[1] = plustime[2];
+              plustime[2] = 0;
+            }
+            else if (i == 1)
+            {
+              plustime[1] = plustime[2];
+              plustime[2] = 0;
+            }
+            else plustime[i] = 0;
+            break;
           }
         }
         addTail();
+        addItem();
       }
 
       if(map[heady][headx] == 5)
       {
+        minusSC++;
         map[heady][headx] = 0;
         for (int i = 0; i < minus.size(); i++)
         {
           if (headx == minus[i].getx() && heady == minus[i].gety())
           {
             minus.erase(minus.begin() + i);
+            item_cnt--;
+            itemon = false;
+            if (i == 0)
+            {
+              minustime[0] = minustime[1];
+              minustime[1] = minustime[2];
+              minustime[2] = 0;
+            }
+            else if (i == 1)
+            {
+              minustime[1] = minustime[2];
+              minustime[2] = 0;
+            }
+            else minustime[i] = 0;
           }
         }
         delTail();
+        addItem();
       }
       /************************************
       *                                   *
