@@ -169,7 +169,7 @@ public:
   vector<snake> snakes;
   vector<item> plus;
   vector<item> minus;
-  int s_len = 10;
+  int s_len = 5;
   int plustime[3] = {0, 0, 0};
   int minustime[3] = {0, 0, 0};
   int map[21][40];
@@ -312,7 +312,7 @@ public:
   void addItem()
   {
     int r = rand() % 100 + 1;
-    if((r % 3) == 0 && item_cnt <= 2)
+    if((r % 3) == 0 && item_cnt < 3)
     {
       addx = rand() % 38 + 1;
       addy = rand() % 19 + 1;
@@ -332,7 +332,6 @@ public:
             return;
           }
         }
-
         plusItemstart = tick_cnt;
         int index = plus.size();
         plustime[index] = plusItemstart;
@@ -343,37 +342,30 @@ public:
         map[addy][addx] = 4;
         item_cnt++;
 
-        if (item_cnt >= 3) itemon = true;
-
-
+        if (item_cnt >= 3)
+        {
+          itemon = true;
+        }
       }
     }
   }
 
-  /*bool addTail()
+  void addTail()
   {
-    int headx = snakes[0].getx();
-    int heady = snakes[0].gety();
-    if(headx == addx && heady == addy)
-    {
-      s_len += 1;
-      map[addy][addx] = 0;
-      addItem();
-      return true;
-    }
-    return false;
-  }*/
+    s_len += 1;
+  }
 
-/*  void delItem()
+  void delItem()
   {
     int r = rand() % 100 + 1;
-    if((r % 3) == 0 && item_cnt < 2)
+    if((r % 3) == 0 && item_cnt < 3)
     {
       delx = rand() % 38 + 1;
       dely = rand() % 19 + 1;
       if (map[dely][delx] > 0)
       {
         delItem();
+        return;
       }
       else
       {
@@ -382,42 +374,31 @@ public:
           if(delx == snakes[i].getx() && dely == snakes[i].gety())
           {
             delItem();
+            return;
           }
-          else
-          {
-            minusItemstart = tick_cnt;
-            int index = minus.size();
-            minustime[index] = minusItemstart;
 
-            item tmp(delx, dely);
-            minus.push_back(tmp);
+        }
+        minusItemstart = tick_cnt;
+        int index = minus.size();
+        minustime[index] = minusItemstart;
 
-            map[dely][delx] = 5;
-            item_cnt++;
-            if (item_cnt >= 3)
-            {
-              itemon = true;
-            }
-          }
+        item tmp(delx, dely);
+        minus.push_back(tmp);
+
+        map[dely][delx] = 5;
+        item_cnt++;
+        if (item_cnt >= 3)
+        {
+          itemon = true;
         }
       }
     }
+  }
 
-  } */
-
-  /*bool delTail()
+  void delTail()
   {
-    int headx = snakes[0].getx();
-    int heady = snakes[0].gety();
-    if(headx == delx && heady == dely)
-    {
-      s_len -= 1;
-      map[dely][delx] = 0;
-      delItem();
-      return true;
-    }
-    return false;
-  }*/
+    s_len -= 1;
+  }
 
 
   void moveSnake(char dir)
@@ -734,12 +715,11 @@ public:
       }
       if(itemon == false)
       {
-      //  delItem();
+        delItem();
       }
 
       /// item 지속시간 100틱
-      if(plusItempassing == false)
-      {
+      if(plustime[0] != 0){
         if(tick_cnt - plustime[0] >= 50)
         {
           map[plus[0].gety()][plus[0].getx()] = 0;
@@ -753,8 +733,7 @@ public:
         }
       }
 
-    /*  if(minusItempassing == false)
-      {
+      if(minustime[0] != 0){
         if(tick_cnt - minustime[0] >= 50)
         {
           map[minus[0].gety()][minus[0].getx()] = 0;
@@ -766,7 +745,35 @@ public:
           itemon = false;
           delItem();
         }
-      } */
+      }
+
+
+
+      if(map[heady][headx] == 4)
+      {
+        map[heady][headx] = 0;
+        for (int i = 0; i < plus.size(); i++)
+        {
+          if (headx == plus[i].getx() && heady == plus[i].gety())
+          {
+            plus.erase(plus.begin() + i);
+          }
+        }
+        addTail();
+      }
+
+      if(map[heady][headx] == 5)
+      {
+        map[heady][headx] = 0;
+        for (int i = 0; i < minus.size(); i++)
+        {
+          if (headx == minus[i].getx() && heady == minus[i].gety())
+          {
+            minus.erase(minus.begin() + i);
+          }
+        }
+        delTail();
+      }
       /************************************
       *                                   *
       *                                   *
@@ -795,7 +802,7 @@ public:
       {
         if(headx == snakes[i].getx() && heady == snakes[i].gety())
         {
-          gameover = 1;
+          delTail();
           break;
         }
       }
