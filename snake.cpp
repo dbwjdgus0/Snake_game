@@ -312,7 +312,7 @@ public:
   void addItem()
   {
     int r = rand() % 100 + 1;
-    if((r % 3) == 0 && item_cnt < 2)
+    if((r % 3) == 0 && item_cnt <= 2)
     {
       addx = rand() % 38 + 1;
       addy = rand() % 19 + 1;
@@ -320,6 +320,7 @@ public:
       if (map[addy][addx] > 0)
       {
         addItem();
+        return;
       }
       else
       {
@@ -328,25 +329,23 @@ public:
           if(addx == snakes[i].getx() && addy == snakes[i].gety())
           {
             addItem();
-          }
-          else
-          {
-            plusItemstart = tick_cnt;
-            int index = plus.size();
-            plustime[index] = plusItemstart;
-
-            item tmp(addx, addy);
-            plus.push_back(tmp);
-
-            map[addy][addx] = 4;
-            item_cnt++;
-
-            if (item_cnt >= 2)
-            {
-              itemon = true;
-            }
+            return;
           }
         }
+
+        plusItemstart = tick_cnt;
+        int index = plus.size();
+        plustime[index] = plusItemstart;
+
+        item tmp(addx, addy);
+        plus.push_back(tmp);
+
+        map[addy][addx] = 4;
+        item_cnt++;
+
+        if (item_cnt >= 3) itemon = true;
+
+
       }
     }
   }
@@ -365,7 +364,7 @@ public:
     return false;
   }*/
 
-  void delItem()
+/*  void delItem()
   {
     int r = rand() % 100 + 1;
     if((r % 3) == 0 && item_cnt < 2)
@@ -395,7 +394,7 @@ public:
 
             map[dely][delx] = 5;
             item_cnt++;
-            if (item_cnt >= 2)
+            if (item_cnt >= 3)
             {
               itemon = true;
             }
@@ -403,7 +402,8 @@ public:
         }
       }
     }
-  }
+
+  } */
 
   /*bool delTail()
   {
@@ -734,7 +734,7 @@ public:
       }
       if(itemon == false)
       {
-        delItem();
+      //  delItem();
       }
 
       /// item 지속시간 100틱
@@ -753,7 +753,7 @@ public:
         }
       }
 
-      if(minusItempassing == false)
+    /*  if(minusItempassing == false)
       {
         if(tick_cnt - minustime[0] >= 50)
         {
@@ -766,7 +766,7 @@ public:
           itemon = false;
           delItem();
         }
-      }
+      } */
       /************************************
       *                                   *
       *                                   *
