@@ -136,21 +136,29 @@ private:
   int stageNum;
 
   int tick_cnt = 0;
-  int gatestart;
-  bool gateon = false;
-  bool gatepassing = false;
+
+  vector<snake> snakes;
+  vector<item> plus;
+  vector<item> minus;
+  int s_len = 3;
 
   int plusSC = 0;
   int minusSC = 0;
   int gateSC = 0;
   int maxLen = 3;
 
+  /// MISSION
   int Mlen = 10;
   int Mplus = 5;
   int Mminus = 2;
   int Mgate = 2;
 
   bool isClear = false;
+
+  int gatestart;
+  bool gateon = false;
+  bool gatepassing = false;
+
 
   int item_cnt = 0;
   int addx;
@@ -164,14 +172,12 @@ private:
   int plusItemstart;
   int minusItemstart;
 
-public:
-
-  vector<snake> snakes;
-  vector<item> plus;
-  vector<item> minus;
-  int s_len = 10;
   int plustime[3] = {0, 0, 0};
   int minustime[3] = {0, 0, 0};
+
+public:
+
+
   int map[21][40];
   int map1[21][40] = {{2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2},
                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -244,7 +250,14 @@ public:
   game(int stage)
   {
     stageNum = stage;
-    if(stageNum <= 2)
+    if(stageNum == 1)
+    {
+      for(int i = 0; i < 21 ; i++)
+      {
+        copy(map1[i], map1[i] + 40, map[i]);
+      }
+    }
+    else if(stageNum == 2)
     {
       for(int i = 0; i < 21 ; i++)
       {
@@ -265,6 +278,7 @@ public:
         copy(map4[i], map4[i] + 40, map[i]);
       }
     }
+
     setlocale(LC_ALL, "");
     initscr();
     curs_set(0);
@@ -312,7 +326,7 @@ public:
   void addItem()
   {
     int r = rand() % 100 + 1;
-    if((r % 3) == 0 && item_cnt < 3)
+    if((r % 5) == 0 && item_cnt < 3)
     {
       addx = rand() % 38 + 1;
       addy = rand() % 19 + 1;
@@ -358,7 +372,7 @@ public:
   void delItem()
   {
     int r = rand() % 100 + 1;
-    if((r % 3) == 0 && item_cnt < 3)
+    if((r % 5) == 0 && item_cnt < 3)
     {
       delx = rand() % 38 + 1;
       dely = rand() % 19 + 1;
@@ -397,6 +411,7 @@ public:
 
   void delTail()
   {
+    snakes.pop_back();
     s_len -= 1;
   }
 
@@ -499,6 +514,8 @@ public:
   {
     int clear = 0;
 
+    if(s_len > maxLen) maxLen = s_len;
+
     WINDOW *sc;
     sc = newwin(21 , 15 , 5, 55);
     wbkgd(sc, COLOR_PAIR(1));
@@ -569,6 +586,7 @@ public:
     wborder(sc, '*','*','*','*','*','*','*','*');
     wattroff(sc, COLOR_PAIR(1));
     wrefresh(sc);
+
 
     if(clear == 4) isClear = true;
   }
@@ -699,13 +717,19 @@ public:
         dir = 'd';
       }
 
-
-
       moveSnake(dir);
 
       int headx = snakes[0].getx();
       int heady = snakes[0].gety();
 
+      for(int i = 1 ; i < s_len ; i++)
+      {
+        if(headx == snakes[i].getx() && heady == snakes[i].gety())
+        {
+          delTail();
+          break;
+        }
+      }
 
       int gameover = 0;
 
@@ -775,8 +799,9 @@ public:
             break;
           }
         }
+
         addTail();
-        addItem();
+
       }
 
       if(map[heady][headx] == 5)
@@ -805,18 +830,8 @@ public:
           }
         }
         delTail();
-        addItem();
+
       }
-      /************************************
-      *                                   *
-      *                                   *
-      *      여기서 아이템 생성 랜덤뽑기!!!   *
-      *                                   *
-      *                                   *
-      **************************************/
-      // 왜냐면 스네이크 움직이고 -> 아이템 만들고 -> 출력하기 순서가 되어야 하기 때문 //
-
-
 
       //// into gate
       if(map[heady][headx] == 3)
@@ -829,16 +844,8 @@ public:
 
 
       /**** GAMEOVER ****/
-      if(map[heady][headx] == 1) gameover = 1;
+      if(map[heady][headx] == 1 || s_len < 3) gameover = 1;
 
-      for(int i = 1 ; i < s_len ; i++)
-      {
-        if(headx == snakes[i].getx() && heady == snakes[i].gety())
-        {
-          delTail();
-          break;
-        }
-      }
 
       if(gameover)
       {
