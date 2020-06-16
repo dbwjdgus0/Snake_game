@@ -106,9 +106,29 @@ public:
     }
   }
 
-
-
 };
+
+class item
+{
+private:
+  int x;
+  int y;
+public:
+  item(int a, int b)
+  {
+    x = a;
+    y = b;
+  }
+  int getx()
+  {
+    return x;
+  }
+  int gety()
+  {
+    return y;
+  }
+};
+
 class game
 {
 
@@ -132,10 +152,26 @@ private:
 
   bool isClear = false;
 
+  int item_cnt = 0;
+  int addx;
+  int addy;
+  int delx;
+  int dely;
+
+  bool plusItempassing = false;
+  bool minusItempassing = false;
+  bool itemon = false;
+  int plusItemstart;
+  int minusItemstart;
+
 public:
 
   vector<snake> snakes;
+  vector<item> plus;
+  vector<item> minus;
   int s_len = 10;
+  int plustime[3] = {0, 0, 0};
+  int minustime[3] = {0, 0, 0};
   int map[21][40];
   int map1[21][40] = {{2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2},
                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -243,6 +279,8 @@ public:
     init_pair(1, COLOR_WHITE , COLOR_GREEN);
     init_pair(2, COLOR_WHITE , COLOR_BLACK);
     init_pair(3, COLOR_RED , COLOR_GREEN);
+    init_pair(4, COLOR_GREEN, COLOR_BLACK);
+    init_pair(5, COLOR_YELLOW, COLOR_BLACK);
     attron(COLOR_PAIR(2));
 
     /// MESSAGE CLEAR
@@ -271,7 +309,115 @@ public:
     }
   }
 
+  void addItem()
+  {
+    int r = rand() % 100 + 1;
+    if((r % 3) == 0 && item_cnt < 2)
+    {
+      addx = rand() % 38 + 1;
+      addy = rand() % 19 + 1;
 
+      if (map[addy][addx] > 0)
+      {
+        addItem();
+      }
+      else
+      {
+        for(int i = 0 ; i < s_len ; i++)
+        {
+          if(addx == snakes[i].getx() && addy == snakes[i].gety())
+          {
+            addItem();
+          }
+          else
+          {
+            plusItemstart = tick_cnt;
+            int index = plus.size();
+            plustime[index] = plusItemstart;
+
+            item tmp(addx, addy);
+            plus.push_back(tmp);
+
+            map[addy][addx] = 4;
+            item_cnt++;
+
+            if (item_cnt >= 2)
+            {
+              itemon = true;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /*bool addTail()
+  {
+    int headx = snakes[0].getx();
+    int heady = snakes[0].gety();
+    if(headx == addx && heady == addy)
+    {
+      s_len += 1;
+      map[addy][addx] = 0;
+      addItem();
+      return true;
+    }
+    return false;
+  }*/
+
+  void delItem()
+  {
+    int r = rand() % 100 + 1;
+    if((r % 3) == 0 && item_cnt < 2)
+    {
+      delx = rand() % 38 + 1;
+      dely = rand() % 19 + 1;
+      if (map[dely][delx] > 0)
+      {
+        delItem();
+      }
+      else
+      {
+        for(int i = 0 ; i < s_len ; i++)
+        {
+          if(delx == snakes[i].getx() && dely == snakes[i].gety())
+          {
+            delItem();
+          }
+          else
+          {
+            minusItemstart = tick_cnt;
+            int index = minus.size();
+            minustime[index] = minusItemstart;
+
+            item tmp(delx, dely);
+            minus.push_back(tmp);
+
+            map[dely][delx] = 5;
+            item_cnt++;
+            if (item_cnt >= 2)
+            {
+              itemon = true;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /*bool delTail()
+  {
+    int headx = snakes[0].getx();
+    int heady = snakes[0].gety();
+    if(headx == delx && heady == dely)
+    {
+      s_len -= 1;
+      map[dely][delx] = 0;
+      delItem();
+      return true;
+    }
+    return false;
+  }*/
 
 
   void moveSnake(char dir)
@@ -337,6 +483,18 @@ public:
               wattron(gwin, COLOR_PAIR(3));
               mvwprintw(gwin, i, j, "\u2B1B");
               wattroff(gwin, COLOR_PAIR(3));
+          }
+          else if (map[i][j] == 4)
+          {
+            wattron(gwin, COLOR_PAIR(4));
+            mvwprintw(gwin, i, j, "\u2B1B");
+            wattroff(gwin, COLOR_PAIR(4));
+          }
+          else if (map[i][j] == 5)
+          {
+            wattron(gwin, COLOR_PAIR(5));
+            mvwprintw(gwin, i, j, "\u2B1B");
+            wattroff(gwin, COLOR_PAIR(5));
           }
 
       }
@@ -570,6 +728,45 @@ public:
 
       int gameover = 0;
 
+      if(itemon == false)
+      {
+        addItem();
+      }
+      if(itemon == false)
+      {
+        delItem();
+      }
+
+      /// item 지속시간 100틱
+      if(plusItempassing == false)
+      {
+        if(tick_cnt - plustime[0] >= 50)
+        {
+          map[plus[0].gety()][plus[0].getx()] = 0;
+          plus.erase(plus.begin());
+          plustime[0] = plustime[1];
+          plustime[1] = plustime[2];
+          plustime[2] = 0;
+          item_cnt--;
+          itemon = false;
+          addItem();
+        }
+      }
+
+      if(minusItempassing == false)
+      {
+        if(tick_cnt - minustime[0] >= 50)
+        {
+          map[minus[0].gety()][minus[0].getx()] = 0;
+          minus.erase(minus.begin());
+          minustime[0] = minustime[1];
+          minustime[1] = minustime[2];
+          minustime[2] = 0;
+          item_cnt--;
+          itemon = false;
+          delItem();
+        }
+      }
       /************************************
       *                                   *
       *                                   *
@@ -625,8 +822,6 @@ public:
     getch();
 
     return isClear;
-
-
   }
 
 };
