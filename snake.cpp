@@ -250,6 +250,12 @@ public:
   game(int stage)
   {
     stageNum = stage;
+    //스테이지 올라갈때마다 달성조건 2씩 업업
+    Mlen += (stage-1) * 2;
+    Mplus += (stage-1) * 2;
+    Mminus += (stage-1) * 2;
+    Mgate += (stage-1) * 2;
+
     if(stageNum == 1)
     {
       for(int i = 0; i < 21 ; i++)
